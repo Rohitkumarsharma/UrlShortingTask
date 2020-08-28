@@ -22,7 +22,7 @@ public class UrlShortenerServiceImpl implements UrlShortenerService{
 	private String baseUrl ;
 	
 	@Autowired
-    private UrlCache urlCache;
+        private UrlCache urlCache;
 	
 	@Autowired
 	private UrlRepositoryService urlRepositoryService;
@@ -31,16 +31,24 @@ public class UrlShortenerServiceImpl implements UrlShortenerService{
 	@Override
 	public ResponseEntity<String> shortenUrl(String url) 
 	{
-		
-		int randomNumber = RamdomUniqueGenratorUtil.getRandomNumberString();
-		String convertUniqueString = RamdomUniqueGenratorUtil.convertBase10ToBase62ID(randomNumber);
-		String tinyUrl =  baseUrl+convertUniqueString;
-		logger.info("In UrlShortenerServiceImpl.shortenUrl() - UniqueId- ",convertUniqueString);
-		logger.info("In UrlShortenerServiceImpl.shortenUrl() - tinyUrl- ",tinyUrl);
-		saveToDB( convertUniqueString , url);
-		updateToCache(convertUniqueString , url);
-	
-		return ResponseEntity.ok().body(tinyUrl);
+		if(this.urlCache.getLongUrlToShortUrlChache().get(url)!=null)
+			return ResponseEntity.ok().body(this.urlCache.getLongUrlToShortUrlChache().get(url));
+		else {
+			int randomNumber = RamdomUniqueGenratorUtil.getRandomNumberString();
+			String convertUniqueString = RamdomUniqueGenratorUtil.convertBase10ToBase62ID(randomNumber);
+			String tinyUrl = baseUrl + convertUniqueString;
+			logger.info("In UrlShortenerServiceImpl.shortenUrl() - UniqueId- ", convertUniqueString);
+			logger.info("In UrlShortenerServiceImpl.shortenUrl() - tinyUrl- ", tinyUrl);
+			saveToDB(convertUniqueString, url);
+			updateToCache(convertUniqueString, url);
+			updateLongUrlToShortUrlCache(url, tinyUrl);
+			return ResponseEntity.ok().body(tinyUrl);
+		}
+	}
+
+	private void updateLongUrlToShortUrlCache(String url, String tinyUrl)
+	{
+		this.urlCache.getLongUrlToShortUrlChache().put(url , tinyUrl);
 	}
 
 	private void updateToCache(String convertUniqueString, String url)
