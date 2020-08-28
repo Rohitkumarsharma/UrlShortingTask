@@ -1,0 +1,10 @@
+spring:
+   application:
+     name: spring boot yml example
+    
+server:
+   port: 8080
+   
+   
+baseUrl:
+  baseurl : http://localhost:8080/redirect/   
